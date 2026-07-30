@@ -1,6 +1,7 @@
 """
 Application Settings — Pydantic v2 BaseSettings
 """
+
 from functools import lru_cache
 from typing import List, Optional
 
@@ -29,19 +30,16 @@ class Settings(BaseSettings):
     # ── MongoDB ───────────────────────────────────────────────────────────────
     MONGO_URI: str = "mongodb://localhost:27017"
     DATABASE_NAME: str = "feedbackiq"
-    MONGO_DB_NAME: Optional[str] = None  # Backward compatibility alias
+    MONGO_DB_NAME: Optional[str] = None
     MONGO_MAX_POOL_SIZE: int = 100
     MONGO_MIN_POOL_SIZE: int = 10
 
     # ── Redis ─────────────────────────────────────────────────────────────────
-    from typing import Optional
-
-# ── Redis ─────────────────────────────────────────────────────────────────
-
     REDIS_HOST: Optional[str] = None
     REDIS_PORT: Optional[int] = None
     REDIS_DB: int = 0
     REDIS_PASSWORD: Optional[str] = None
+
     # ── Security ──────────────────────────────────────────────────────────────
     SECRET_KEY: str = Field(default="dev-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
