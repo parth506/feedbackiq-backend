@@ -59,7 +59,7 @@ backend/
 Create a `.env` file in `backend/`:
 
 ```env
-MONGO_URI=mongodb://localhost:27017
+MONGO_URI=mongodb+srv://informationtechiparth4675_db_user:a0qVRurHcO6ICacI@feedbackiq-cluster.h3wvrvw.mongodb.net/?appName=feedbackiq-cluster
 DATABASE_NAME=feedbackiq
 REDIS_HOST=localhost
 REDIS_PORT=6379
