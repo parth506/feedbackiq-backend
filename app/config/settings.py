@@ -34,11 +34,14 @@ class Settings(BaseSettings):
     MONGO_MIN_POOL_SIZE: int = 10
 
     # ── Redis ─────────────────────────────────────────────────────────────────
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = ""
+    from typing import Optional
 
+# ── Redis ─────────────────────────────────────────────────────────────────
+
+REDIS_HOST: Optional[str] = None
+REDIS_PORT: Optional[int] = None
+REDIS_DB: int = 0
+REDIS_PASSWORD: Optional[str] = None
     # ── Security ──────────────────────────────────────────────────────────────
     SECRET_KEY: str = Field(default="dev-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
