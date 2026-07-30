@@ -1,6 +1,7 @@
 """
 FeedbackIQ — Application Entry Point
 """
+
 from contextlib import asynccontextmanager
 import logging
 
@@ -10,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.settings import get_settings
 from app.utils.logging import setup_logging
 
-# Initialize logging configuration
+# Initialize logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
@@ -26,62 +27,95 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application resources across startup and shutdown."""
-    # Startup: MongoDB & Redis connection
+    """Application startup/shutdown lifecycle."""
+
+    # Startup
     try:
         await connect_db()
+        logger.info("✅ MongoDB Connected")
     except Exception as exc:
-        logger.error("Failed to connect to MongoDB at startup: %s", exc)
+        logger.exception("❌ Failed to connect to MongoDB: %s", exc)
 
     try:
         await connect_redis()
+        logger.info("✅ Redis Connected")
     except Exception as exc:
-        logger.warning("Failed to connect to Redis at startup: %s. Continuing in MongoDB fallback mode.", exc)
+        logger.warning(
+            "⚠️ Redis unavailable. Running without cache. %s",
+            exc,
+        )
 
     yield
 
-    # Shutdown: MongoDB & Redis disconnection
+    # Shutdown
     try:
         await disconnect_db()
     except Exception as exc:
-        logger.warning("Error disconnecting MongoDB: %s", exc)
+        logger.warning("MongoDB disconnect error: %s", exc)
 
     try:
         await disconnect_redis()
     except Exception as exc:
-        logger.warning("Error disconnecting Redis: %s", exc)
+        logger.warning("Redis disconnect error: %s", exc)
 
 
 def create_app() -> FastAPI:
-    """FastAPI Application Factory."""
+    """Application Factory."""
+
     application = FastAPI(
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
-        description="FeedbackIQ — Production-ready Intelligent Feedback Management Platform API",
+        description="FeedbackIQ API",
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
         lifespan=lifespan,
     )
 
-    # ── CORS Middleware ────────────────────────────────────────────────────────
+    # ==========================================================================
+    # CORS
+    # ==========================================================================
+
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://feediq2.netlify.app",
+    ]
+
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],
     )
 
-    # ── Custom Middleware ─────────────────────────────────────────────────────
+    # ==========================================================================
+    # Middleware
+    # ==========================================================================
+
     application.add_middleware(RequestTimingMiddleware)
     application.add_middleware(RequestLoggingMiddleware)
 
-    # ── Exception Handlers ────────────────────────────────────────────────────
+    # ==========================================================================
+    # Exception Handlers
+    # ==========================================================================
+
     register_exception_handlers(application)
 
-    # ── Routers ───────────────────────────────────────────────────────────────
+    # ==========================================================================
+    # Routes
+    # ==========================================================================
+
     application.include_router(api_router)
+
+    @application.get("/")
+    async def root():
+        return {
+            "message": "FeedbackIQ Backend Running 🚀",
+            "docs": "/docs",
+        }
 
     return application
 
