@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # ── MongoDB ───────────────────────────────────────────────────────────────
-    MONGO_URI: str = "mongodb://localhost:27017"
+    MONGO_URI: str = "mongodb+srv://informationtechiparth4675_db_user:PUt92k5bN9npKgK7@feedbackiq-cluster.h3wvrvw.mongodb.net/?appName=feedbackiq-cluster"
     DATABASE_NAME: str = "feedbackiq"
     MONGO_DB_NAME: Optional[str] = None
     MONGO_MAX_POOL_SIZE: int = 100
