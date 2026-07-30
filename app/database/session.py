@@ -23,7 +23,7 @@ class DatabaseManager:
     async def connect(cls) -> None:
         """Initialize Motor client with connection pooling and verify connectivity."""
         if cls._client is None:
-            logger.info("Connecting to MongoDB at %s ...", settings.MONGO_URI)
+            logger.info("Connecting to MongoDB...")
             client_kwargs = {
                 "maxPoolSize": settings.MONGO_MAX_POOL_SIZE,
                 "minPoolSize": settings.MONGO_MIN_POOL_SIZE,
