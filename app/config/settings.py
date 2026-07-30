@@ -38,10 +38,10 @@ class Settings(BaseSettings):
 
 # ── Redis ─────────────────────────────────────────────────────────────────
 
-REDIS_HOST: Optional[str] = None
-REDIS_PORT: Optional[int] = None
-REDIS_DB: int = 0
-REDIS_PASSWORD: Optional[str] = None
+    REDIS_HOST: Optional[str] = None
+    REDIS_PORT: Optional[int] = None
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: Optional[str] = None
     # ── Security ──────────────────────────────────────────────────────────────
     SECRET_KEY: str = Field(default="dev-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
