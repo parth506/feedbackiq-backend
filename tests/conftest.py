@@ -34,7 +34,9 @@ def mock_cache() -> CacheService:
     cache.get = AsyncMock(return_value=None)           # always miss
     cache.set = AsyncMock(return_value=True)
     cache.delete = AsyncMock(return_value=1)
-    cache.get_or_set = AsyncMock(side_effect=lambda key, factory, ttl=None: factory())
+    async def _get_or_set(key, factory, ttl=None):
+        return await factory()
+    cache.get_or_set = AsyncMock(side_effect=_get_or_set)
     return cache
 
 
