@@ -16,4 +16,4 @@ build/
 .ruff_cache/
 htmlcov/
 .coverage
-test_mongo.py
+test.py
