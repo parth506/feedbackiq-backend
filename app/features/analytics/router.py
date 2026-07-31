@@ -5,7 +5,15 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from app.dependencies.feedback import get_analytics_service
-from app.features.analytics.schemas import TimeSeriesPointDTO, CategoryMetricDTO, RatingsResponse
+from app.features.analytics.schemas import (
+    TimeSeriesPointDTO,
+    CategoryMetricDTO,
+    RatingsResponse,
+    GeographicRegionDTO,
+    CustomerClusterPointDTO,
+    MLResponseDTO,
+    CorrelationMetricDTO,
+)
 from app.services.analytics_service import AnalyticsService
 
 router = APIRouter(prefix="/v1/analytics", tags=["3. Analytics & Time Series"])
@@ -48,4 +56,49 @@ async def get_ratings(
 ) -> RatingsResponse:
     """Return ratings spread and review length density."""
     return await service.get_ratings_distribution()
+
+
+@router.get(
+    "/geo",
+    response_model=List[GeographicRegionDTO],
+    summary="Get Geographical Analytics",
+)
+async def get_geo(
+    service: AnalyticsService = Depends(get_analytics_service),
+) -> List[GeographicRegionDTO]:
+    return await service.get_geo_regions()
+
+
+@router.get(
+    "/segmentation",
+    response_model=List[CustomerClusterPointDTO],
+    summary="Get Customer Segmentation Clusters",
+)
+async def get_segmentation(
+    service: AnalyticsService = Depends(get_analytics_service),
+) -> List[CustomerClusterPointDTO]:
+    return await service.get_customer_clusters()
+
+
+@router.get(
+    "/ml",
+    response_model=MLResponseDTO,
+    summary="Get ML SHAP Feature Importance & Evaluation",
+)
+async def get_ml(
+    service: AnalyticsService = Depends(get_analytics_service),
+) -> MLResponseDTO:
+    return await service.get_ml_insights()
+
+
+@router.get(
+    "/correlations",
+    response_model=List[CorrelationMetricDTO],
+    summary="Get Feature Correlation Matrix",
+)
+async def get_correlations(
+    service: AnalyticsService = Depends(get_analytics_service),
+) -> List[CorrelationMetricDTO]:
+    return await service.get_correlations()
+
 

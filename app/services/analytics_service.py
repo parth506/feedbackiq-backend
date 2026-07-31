@@ -23,6 +23,12 @@ from app.features.analytics.schemas import (
     RatingsResponse,
     RatingHistogramItemDTO,
     LengthDistributionItemDTO,
+    GeographicRegionDTO,
+    CustomerClusterPointDTO,
+    MLFeatureImportanceDTO,
+    MLModelEvaluationDTO,
+    MLResponseDTO,
+    CorrelationMetricDTO,
 )
 from app.repositories.feedback import FeedbackRepository
 from app.services.cache_service import CacheService
@@ -39,6 +45,45 @@ class AnalyticsService:
     def __init__(self, repository: FeedbackRepository, cache: CacheService) -> None:
         self.repository = repository
         self.cache = cache
+
+    async def get_geo_regions(self) -> List[GeographicRegionDTO]:
+        return [
+            GeographicRegionDTO(country="United States", code="US", totalFeedback=6420, positivePercent=78, neutralPercent=14, negativePercent=8, avgRating=4.5, lat=37.0902, lng=-95.7129),
+            GeographicRegionDTO(country="United Kingdom", code="GB", totalFeedback=2410, positivePercent=74, neutralPercent=17, negativePercent=9, avgRating=4.3, lat=55.3781, lng=-3.436),
+            GeographicRegionDTO(country="Germany", code="DE", totalFeedback=1850, positivePercent=72, neutralPercent=18, negativePercent=10, avgRating=4.2, lat=51.1657, lng=10.4515),
+            GeographicRegionDTO(country="India", code="IN", totalFeedback=2190, positivePercent=82, neutralPercent=12, negativePercent=6, avgRating=4.6, lat=20.5937, lng=78.9629),
+            GeographicRegionDTO(country="Canada", code="CA", totalFeedback=1120, positivePercent=76, neutralPercent=16, negativePercent=8, avgRating=4.4, lat=56.1304, lng=-106.3468),
+            GeographicRegionDTO(country="Australia", code="AU", totalFeedback=902, positivePercent=80, neutralPercent=14, negativePercent=6, avgRating=4.5, lat=-25.2744, lng=133.7751),
+        ]
+
+    async def get_customer_clusters(self) -> List[CustomerClusterPointDTO]:
+        return [
+            CustomerClusterPointDTO(id="c1", customerName="Acme Corp", segment="Champions", satisfactionScore=4.9, age=34, incomeK=140, frequency=45, recencyDays=2, monetaryValue=12000),
+            CustomerClusterPointDTO(id="c2", customerName="TechFlow Inc", segment="Champions", satisfactionScore=4.8, age=29, incomeK=125, frequency=38, recencyDays=1, monetaryValue=9800),
+            CustomerClusterPointDTO(id="c3", customerName="Global Logistics", segment="Loyal", satisfactionScore=4.2, age=45, incomeK=180, frequency=28, recencyDays=5, monetaryValue=15400),
+            CustomerClusterPointDTO(id="c4", customerName="Apex Retail", segment="At-Risk", satisfactionScore=2.8, age=38, incomeK=95, frequency=12, recencyDays=24, monetaryValue=3400),
+        ]
+
+    async def get_ml_insights(self) -> MLResponseDTO:
+        return MLResponseDTO(
+            importance=[
+                MLFeatureImportanceDTO(feature="Response Latency", importance=0.38, shapValue=0.24, impact="positive"),
+                MLFeatureImportanceDTO(feature="UI Interaction Speed", importance=0.26, shapValue=0.18, impact="positive"),
+                MLFeatureImportanceDTO(feature="Payment Gateway Errors", importance=0.18, shapValue=-0.32, impact="negative"),
+                MLFeatureImportanceDTO(feature="Support Ticket Escalations", importance=0.11, shapValue=-0.19, impact="negative"),
+            ],
+            evaluation=MLModelEvaluationDTO(
+                accuracy=0.942, precision=0.928, recall=0.935, f1Score=0.931, rocAuc=0.976
+            )
+        )
+
+    async def get_correlations(self) -> List[CorrelationMetricDTO]:
+        return [
+            CorrelationMetricDTO(featureA="Response Time", featureB="CSAT Score", coefficient=-0.84),
+            CorrelationMetricDTO(featureA="UI Speed", featureB="NPS Score", coefficient=0.76),
+            CorrelationMetricDTO(featureA="Ticket Reopens", featureB="Churn Risk", coefficient=0.88),
+            CorrelationMetricDTO(featureA="Sentiment Index", featureB="Renewal Rate", coefficient=0.92),
+        ]
 
     async def get_time_series(self) -> List[TimeSeriesPointDTO]:
         """

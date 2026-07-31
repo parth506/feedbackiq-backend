@@ -28,3 +28,48 @@ class RatingsResponse(BaseModel):
     ratings: List[RatingHistogramItemDTO]
     lengthDistribution: List[LengthDistributionItemDTO]
 
+class GeographicRegionDTO(BaseModel):
+    country: str
+    code: str
+    totalFeedback: int
+    positivePercent: float
+    neutralPercent: float
+    negativePercent: float
+    avgRating: float
+    lat: float
+    lng: float
+
+class CustomerClusterPointDTO(BaseModel):
+    id: str
+    customerName: str
+    segment: str
+    satisfactionScore: float
+    age: int
+    incomeK: int
+    frequency: int
+    recencyDays: int
+    monetaryValue: float
+
+class MLFeatureImportanceDTO(BaseModel):
+    feature: str
+    importance: float
+    shapValue: float
+    impact: str
+
+class MLModelEvaluationDTO(BaseModel):
+    accuracy: float
+    precision: float
+    recall: float
+    f1Score: float
+    rocAuc: float
+
+class MLResponseDTO(BaseModel):
+    importance: List[MLFeatureImportanceDTO]
+    evaluation: MLModelEvaluationDTO
+
+class CorrelationMetricDTO(BaseModel):
+    featureA: str
+    featureB: str
+    coefficient: float
+
+
