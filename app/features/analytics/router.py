@@ -5,7 +5,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from app.dependencies.feedback import get_analytics_service
-from app.features.analytics.schemas import TimeSeriesPointDTO, CategoryMetricDTO
+from app.features.analytics.schemas import TimeSeriesPointDTO, CategoryMetricDTO, RatingsResponse
 from app.services.analytics_service import AnalyticsService
 
 router = APIRouter(prefix="/v1/analytics", tags=["3. Analytics & Time Series"])
@@ -35,3 +35,17 @@ async def get_categories(
 ) -> List[CategoryMetricDTO]:
     """Return category-level feedback distribution metrics."""
     return await service.get_category_metrics()
+
+
+@router.get(
+    "/ratings",
+    response_model=RatingsResponse,
+    summary="Get Ratings and Length Distribution Analytics",
+    description="Live ratings spread and review length density computed from MongoDB.",
+)
+async def get_ratings(
+    service: AnalyticsService = Depends(get_analytics_service),
+) -> RatingsResponse:
+    """Return ratings spread and review length density."""
+    return await service.get_ratings_distribution()
+

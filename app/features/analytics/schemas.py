@@ -15,3 +15,16 @@ class CategoryMetricDTO(BaseModel):
     resolved: int = Field(..., example=4320)
     unresolved: int = Field(..., example=180)
     satisfactionScore: float = Field(..., example=4.6)
+
+class RatingHistogramItemDTO(BaseModel):
+    rating: int
+    count: int
+
+class LengthDistributionItemDTO(BaseModel):
+    range: str
+    count: int
+
+class RatingsResponse(BaseModel):
+    ratings: List[RatingHistogramItemDTO]
+    lengthDistribution: List[LengthDistributionItemDTO]
+

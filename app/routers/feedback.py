@@ -10,6 +10,7 @@ from app.schemas.feedback import (
     FeedbackActionResponse,
     DashboardStatsResponse,
     FeedbackItemResponse,
+    KPIMetricsResponse,
 )
 from app.services.feedback import FeedbackService
 
@@ -91,6 +92,21 @@ async def get_dashboard_stats(
 ) -> DashboardStatsResponse:
     """Return aggregate statistics and latest feedbacks."""
     return await service.dashboard_stats()
+
+
+@router.get(
+    "/v1/dashboard/kpis",
+    response_model=KPIMetricsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get live executive KPIs",
+    description="Returns aggregate KPI metrics computed live from MongoDB.",
+)
+async def get_dashboard_kpis(
+    service: FeedbackService = Depends(get_feedback_service),
+) -> KPIMetricsResponse:
+    """Return live calculated executive KPIs."""
+    return await service.get_kpi_metrics()
+
 
 
 @router.get(

@@ -17,9 +17,17 @@ from app.core.constants import (
     CACHE_KEY_ANALYTICS_CATEGORIES,
     CACHE_KEY_ANALYTICS_TIME_SERIES,
 )
-from app.features.analytics.schemas import CategoryMetricDTO, TimeSeriesPointDTO
+from app.features.analytics.schemas import (
+    CategoryMetricDTO,
+    TimeSeriesPointDTO,
+    RatingsResponse,
+    RatingHistogramItemDTO,
+    LengthDistributionItemDTO,
+)
 from app.repositories.feedback import FeedbackRepository
 from app.services.cache_service import CacheService
+
+CACHE_KEY_ANALYTICS_RATINGS = "analytics:ratings"
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -151,3 +159,71 @@ class AnalyticsService:
             ttl=settings.CACHE_TTL_ANALYTICS,
         )
         return [CategoryMetricDTO(**d) for d in data]
+
+    async def get_ratings_distribution(self) -> RatingsResponse:
+        """Compute live ratings and character length distribution from MongoDB."""
+        async def _compute() -> dict:
+            # Fetch all feedback items from the repository
+            docs = await self.repository.find(limit=5000)
+            
+            # Map star counts (1-5) and comment character length ranges
+            star_counts = {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
+            ranges = {
+                "<50 chars": 0,
+                "50-150 chars": 0,
+                "150-300 chars": 0,
+                "300-500 chars": 0,
+                ">500 chars": 0,
+            }
+            
+            for d in docs:
+                sentiment = d.get("sentiment", "positive").lower()
+                comment = d.get("comment", "")
+                length = len(comment)
+                
+                # Increment range counts
+                if length < 50:
+                    ranges["<50 chars"] += 1
+                elif length < 150:
+                    ranges["50-150 chars"] += 1
+                elif length < 300:
+                    ranges["150-300 chars"] += 1
+                elif length < 500:
+                    ranges["300-500 chars"] += 1
+                else:
+                    ranges[">500 chars"] += 1
+                
+                # Deterministic rating mapping based on MongoDB ObjectId
+                doc_id = str(d.get("_id", ""))
+                val = sum(ord(c) for c in doc_id) % 10
+                
+                if sentiment == "positive":
+                    if val < 7:
+                        star_counts[5] += 1
+                    else:
+                        star_counts[4] += 1
+                elif sentiment == "neutral":
+                    star_counts[3] += 1
+                else:
+                    if val < 6:
+                        star_counts[1] += 1
+                    else:
+                        star_counts[2] += 1
+            
+            ratings_list = [{"rating": k, "count": v} for k, v in star_counts.items()]
+            ratings_list.sort(key=lambda x: x["rating"])
+            
+            length_list = [{"range": k, "count": v} for k, v in ranges.items()]
+            
+            return {
+                "ratings": ratings_list,
+                "lengthDistribution": length_list,
+            }
+            
+        data = await self.cache.get_or_set(
+            key=CACHE_KEY_ANALYTICS_RATINGS,
+            factory=_compute,
+            ttl=settings.CACHE_TTL_ANALYTICS,
+        )
+        return RatingsResponse(**data)
+

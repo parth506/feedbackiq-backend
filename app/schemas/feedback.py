@@ -51,3 +51,17 @@ class DashboardStatsResponse(BaseModel):
         default_factory=list,
         description="Top 10 latest submitted feedbacks"
     )
+
+class KPIMetricDTO(BaseModel):
+    id: str
+    title: str
+    value: str
+    change: float
+    period: str
+    trend: str
+    sparkline: List[float]
+    color: str
+
+class KPIMetricsResponse(BaseModel):
+    metrics: List[KPIMetricDTO]
+

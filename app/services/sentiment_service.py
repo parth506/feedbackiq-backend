@@ -15,7 +15,7 @@ from app.core.constants import (
     CACHE_KEY_SENTIMENT_EMOTIONS,
     CACHE_KEY_SENTIMENT_EVOLUTION,
 )
-from app.features.sentiment.schemas import EmotionScoreDTO, SentimentEvolutionDTO
+from app.features.sentiment.schemas import EmotionScoreDTO, SentimentEvolutionDTO, SentimentRadarResponse
 from app.repositories.feedback import FeedbackRepository
 from app.services.cache_service import CacheService
 
@@ -120,3 +120,10 @@ class SentimentService:
             ttl=settings.CACHE_TTL_SENTIMENT,
         )
         return [SentimentEvolutionDTO(**d) for d in data]
+
+    async def get_emotion_radar_response(self) -> SentimentRadarResponse:
+        """Combine emotion radar scores and evolution timeline in one response."""
+        emotions = await self.get_emotion_radar()
+        timeline = await self.get_evolution_timeline()
+        return SentimentRadarResponse(emotions=emotions, timeSeries=timeline)
+

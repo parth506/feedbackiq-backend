@@ -11,3 +11,8 @@ class SentimentEvolutionDTO(BaseModel):
     date: str = Field(..., example="Jul 30")
     sentimentIndex: float = Field(..., example=0.68)
     positiveRatio: float = Field(..., example=0.78)
+
+class SentimentRadarResponse(BaseModel):
+    emotions: List[EmotionScoreDTO]
+    timeSeries: List[SentimentEvolutionDTO]
+
