@@ -1,26 +1,29 @@
+"""
+Search Router — Thin delegate. All logic in SearchService.
+Supports pagination via limit + offset query parameters.
+"""
 from typing import List
-from fastapi import APIRouter, Query
-from app.database.session import get_database
+from fastapi import APIRouter, Depends, Query
+
+from app.dependencies.feedback import get_search_service
 from app.features.search.schemas import SearchResultDTO
+from app.services.search_service import SearchService
+from app.core.constants import DEFAULT_PAGE_SIZE, MAX_SEARCH_RESULTS
 
 router = APIRouter(prefix="/v1/search", tags=["8. Search & Discovery"])
 
-@router.get("/comments", response_model=List[SearchResultDTO], summary="Search Feedback Comments in MongoDB")
-async def search_comments(q: str = Query(..., description="Query string to search in MongoDB comments", examples=["dashboard"])) -> List[SearchResultDTO]:
-    """Perform case-insensitive regex search directly against MongoDB feedback comments."""
-    db = get_database()
-    collection = db["feedback"]
 
-    regex_query = {"comment": {"$regex": q, "$options": "i"}}
-    cursor = collection.find(regex_query).sort("created_at", -1).limit(50)
-    docs = await cursor.to_list(length=50)
-
-    return [
-        SearchResultDTO(
-            id=str(doc["_id"]),
-            sentiment=doc.get("sentiment", "positive"),
-            comment=doc.get("comment", ""),
-            created_at=doc.get("created_at").isoformat() if doc.get("created_at") else ""
-        )
-        for doc in docs
-    ]
+@router.get(
+    "/comments",
+    response_model=List[SearchResultDTO],
+    summary="Search Feedback Comments",
+    description="Case-insensitive keyword search in MongoDB feedback comments with pagination.",
+)
+async def search_comments(
+    q: str = Query(..., min_length=1, max_length=200, description="Search keyword"),
+    limit: int = Query(default=DEFAULT_PAGE_SIZE, ge=1, le=MAX_SEARCH_RESULTS, description="Results per page"),
+    offset: int = Query(default=0, ge=0, description="Number of results to skip"),
+    service: SearchService = Depends(get_search_service),
+) -> List[SearchResultDTO]:
+    """Search feedback comments by keyword with optional pagination."""
+    return await service.search_comments(query=q, limit=limit, offset=offset)
