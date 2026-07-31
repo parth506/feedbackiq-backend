@@ -21,7 +21,8 @@ class CreateFeedbackRequest(BaseModel):
     )
     comment: Optional[str] = Field(
         default="",
-        description="Optional feedback comment",
+        max_length=1000,
+        description="Optional feedback comment (max 1000 characters)",
         examples=["Great dashboard"]
     )
 
