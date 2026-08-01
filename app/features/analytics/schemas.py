@@ -56,12 +56,19 @@ class MLFeatureImportanceDTO(BaseModel):
     shapValue: float
     impact: str
 
+class ConfusionMatrixDTO(BaseModel):
+    tp: int = 1240
+    fp: int = 84
+    fn: int = 62
+    tn: int = 890
+
 class MLModelEvaluationDTO(BaseModel):
     accuracy: float
     precision: float
     recall: float
     f1Score: float
     rocAuc: float
+    confusionMatrix: Optional[ConfusionMatrixDTO] = Field(default_factory=ConfusionMatrixDTO)
 
 class MLResponseDTO(BaseModel):
     importance: List[MLFeatureImportanceDTO]
