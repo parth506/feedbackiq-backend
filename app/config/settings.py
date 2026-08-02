@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     MONGO_MIN_POOL_SIZE: int = Field(default=10, ge=1)
 
     # ── Redis ─────────────────────────────────────────────────────────────────
+    REDIS_URL: Optional[str] = None
     REDIS_HOST: Optional[str] = None
     REDIS_PORT: Optional[int] = None
     REDIS_DB: int = 0

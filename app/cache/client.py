@@ -22,17 +22,29 @@ class RedisManager:
         """Initialize async Redis client and verify connectivity."""
         if cls._redis is None:
             try:
-                logger.info(
-                    "Connecting to Redis at %s:%s ...", settings.REDIS_HOST, settings.REDIS_PORT
-                )
-                cls._redis = aioredis.Redis(
-                    host=settings.REDIS_HOST,
-                    port=settings.REDIS_PORT,
-                    db=settings.REDIS_DB,
-                    password=settings.REDIS_PASSWORD or None,
-                    decode_responses=True,
-                    socket_connect_timeout=3,
-                )
+                if settings.REDIS_URL:
+                    logger.info("Connecting to Redis via REDIS_URL...")
+                    cls._redis = aioredis.from_url(
+                        settings.REDIS_URL,
+                        decode_responses=True,
+                        socket_connect_timeout=3,
+                    )
+                elif settings.REDIS_HOST and settings.REDIS_PORT:
+                    logger.info(
+                        "Connecting to Redis at %s:%s ...", settings.REDIS_HOST, settings.REDIS_PORT
+                    )
+                    cls._redis = aioredis.Redis(
+                        host=settings.REDIS_HOST,
+                        port=settings.REDIS_PORT,
+                        db=settings.REDIS_DB,
+                        password=settings.REDIS_PASSWORD or None,
+                        decode_responses=True,
+                        socket_connect_timeout=3,
+                    )
+                else:
+                    logger.info("Redis not configured. Running without cache.")
+                    return
+
                 await cls._redis.ping()
                 logger.info("Redis connected successfully.")
             except Exception as exc:
