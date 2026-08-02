@@ -23,11 +23,14 @@ class RedisManager:
         if cls._redis is None:
             try:
                 if settings.REDIS_URL:
+                    url = settings.REDIS_URL.strip()
+                    if not (url.startswith("redis://") or url.startswith("rediss://") or url.startswith("unix://")):
+                        url = f"redis://{url}"
                     logger.info("Connecting to Redis via REDIS_URL...")
                     cls._redis = aioredis.from_url(
-                        settings.REDIS_URL,
+                        url,
                         decode_responses=True,
-                        socket_connect_timeout=3,
+                        socket_connect_timeout=5,
                     )
                 elif settings.REDIS_HOST and settings.REDIS_PORT:
                     logger.info(
@@ -39,7 +42,7 @@ class RedisManager:
                         db=settings.REDIS_DB,
                         password=settings.REDIS_PASSWORD or None,
                         decode_responses=True,
-                        socket_connect_timeout=3,
+                        socket_connect_timeout=5,
                     )
                 else:
                     logger.info("Redis not configured. Running without cache.")
